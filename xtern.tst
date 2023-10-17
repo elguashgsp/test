@@ -1,0 +1,56 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+#Quick exploratory data analysis
+# Load the dataset
+data = pd.read_csv('your_data.csv')  # Replace with your data file path
+
+#Summary statistics
+print(data.describe())
+
+#Visualize order distribution
+plt.figure(figsize=(10, 5))
+sns.countplot(x='Order', data=data, palette='Set1')
+plt.xticks(rotation=90)
+plt.title('Order Distribution')
+plt.show()
+
+
+
+
+
+
+
+
+
+#Building a model to predict customer orders
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score
+import pickle
+
+#Data preparation
+X = data['Major'] + " " + data['University']  # Combine major and university
+y = data['Order']
+
+#Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+#Create a Bag of Words representation of the text
+vectorizer = CountVectorizer()
+X_train_vec = vectorizer.fit_transform(X_train)
+X_test_vec = vectorizer.transform(X_test)
+
+#Train a simple Naive Bayes model
+model = MultinomialNB()
+model.fit(X_train_vec, y_train)
+
+#Evaluate the model
+y_pred = model.predict(X_test_vec)
+accuracy = accuracy_score(y_test, y_pred)
+print("Model Accuracy:", accuracy)
+
+#Pickle the model
+with open('order_prediction_model.pkl', 'wb') as model_file:
+    pickle.dump(model, model_file)
